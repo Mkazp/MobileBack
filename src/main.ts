@@ -9,6 +9,12 @@ async function bootstrap() {
   // Включаем глобальную валидацию
   app.useGlobalPipes(new ValidationPipe());
 
+  app.enableCors({
+    origin: 'http://baze36.ru', // Указываем фронтенд домен или localhost, если вы работаете локально
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'], // Указываем необходимые заголовки
+  });
+
   // Логирование при старте сервера
   const logger = new Logger('Bootstrap');
   await app.listen(3000);
