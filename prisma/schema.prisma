@@ -1,0 +1,121 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  TEACHER
+  STUDENT
+}
+
+model User {
+  id                 Int      @id @default(autoincrement())
+  first_name         String
+  last_name          String
+  group_name         String
+  email              String   @unique
+  password_hash      String
+  role               Role     @default(STUDENT)
+
+  // Связи
+  viewed_cards            UserViewedCard[]
+  userFavoriteCards       UserFavoriteCard[]
+  userFavoriteSubjects    UserFavoriteSubject[]
+  userArchivedSubjects    UserArchivedSubject[]
+
+  // Упрощённые связи многие-ко-многим (для удобства доступа)
+  favorite_cards          Card[]   @relation("FavoriteCards")
+  favorite_subjects       Subject[] @relation("FavoriteSubjects")
+  archived_subjects       Subject[] @relation("ArchivedSubjects")
+}
+
+model Subject {
+  id              Int      @id @default(autoincrement())
+  name            String
+  subject_type    String
+
+  cards           Card[]
+  userFavoriteSubjects  UserFavoriteSubject[]
+  userArchivedSubjects  UserArchivedSubject[]
+
+  // Обратные связи
+  favored_by      User[]  @relation("FavoriteSubjects")
+  archived_by     User[]  @relation("ArchivedSubjects")
+}
+
+model Card {
+  id              Int      @id @default(autoincrement())
+  title           String
+  description     String
+  subject_id      Int
+
+  subject         Subject   @relation(fields: [subject_id], references: [id])
+  viewed_by       UserViewedCard[]
+  userFavoriteCards  UserFavoriteCard[]
+
+  // Многие ко многим: группы
+  groups          Group[]  @relation("CardGroups")
+
+  // Обратная связь
+  favored_by      User[]   @relation("FavoriteCards")
+}
+
+model Group {
+  id      Int      @id @default(autoincrement())
+  name    String   @unique
+
+  cards   Card[]   @relation("CardGroups")
+}
+
+// =============================
+// Pivot-таблицы
+// =============================
+
+model UserViewedCard {
+  user_id    Int
+  card_id    Int
+  viewed_at  DateTime @default(now())
+
+  user       User @relation(fields: [user_id], references: [id])
+  card       Card @relation(fields: [card_id], references: [id])
+
+  @@id([user_id, card_id])
+}
+
+model UserFavoriteCard {
+  user_id  Int
+  card_id  Int
+
+  user     User @relation(fields: [user_id], references: [id])
+  card     Card @relation(fields: [card_id], references: [id])
+
+  @@id([user_id, card_id])
+  @@map("user_favorite_cards")
+}
+
+model UserFavoriteSubject {
+  user_id    Int
+  subject_id Int
+
+  user       User    @relation(fields: [user_id], references: [id])
+  subject    Subject @relation(fields: [subject_id], references: [id])
+
+  @@id([user_id, subject_id])
+  @@map("user_favorite_subjects")
+}
+
+model UserArchivedSubject {
+  user_id    Int
+  subject_id Int
+
+  user       User    @relation(fields: [user_id], references: [id])
+  subject    Subject @relation(fields: [subject_id], references: [id])
+
+  @@id([user_id, subject_id])
+  @@map("user_archived_subjects")
+}
