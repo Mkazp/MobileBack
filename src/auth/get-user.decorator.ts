@@ -6,6 +6,7 @@ export interface User {
   id: number;
   email: string;
   role: string;
+  group_name: string;
 }
 
 // Декоратор для получения текущего пользователя из контекста запроса

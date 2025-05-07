@@ -12,6 +12,7 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
+  // Регистрация пользователя
   async register(dto: RegisterDto) {
     const existing = await this.prisma.user.findUnique({
       where: { email: dto.email },
@@ -41,9 +42,16 @@ export class AuthService {
         email: user.email,
         role: user.role,
       },
+      // Возвращаем token также
+      access_token: await this.jwtService.signAsync({
+        sub: user.id,
+        email: user.email,
+        role: user.role,
+      }),
     };
   }
 
+  // Логирование пользователя
   async login(dto: LoginDto) {
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },
@@ -61,10 +69,13 @@ export class AuthService {
 
     const token = await this.jwtService.signAsync(payload);
 
-    return { access_token: token };
+    return {
+      access_token: token,
+      userId: user.id, // Добавляем ID пользователя в ответ
+    };
   }
 
-  // Метод для удаления текущего пользователя
+  // Удаление пользователя
   async deleteUser(userId: number) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
@@ -79,5 +90,32 @@ export class AuthService {
     });
 
     return { message: 'Пользователь удалён' };
+  }
+
+  // Получить всех пользователей
+  async getAllUsers() {
+    return this.prisma.user.findMany({
+      select: {
+        id: true,
+        first_name: true,
+        last_name: true,
+        email: true,
+        role: true,
+      },
+    });
+  }
+
+  // Получить конкретного пользователя по ID
+  async getUserById(id: number) {
+    return this.prisma.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        first_name: true,
+        last_name: true,
+        email: true,
+        role: true,
+      },
+    });
   }
 }

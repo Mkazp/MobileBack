@@ -14,67 +14,54 @@ enum Role {
 }
 
 model User {
-  id                 Int      @id @default(autoincrement())
-  first_name         String
-  last_name          String
-  group_name         String
-  email              String   @unique
-  password_hash      String
-  role               Role     @default(STUDENT)
+  id                    Int       @id @default(autoincrement())
+  first_name            String
+  last_name             String
+  group_name            String    // Группа пользователя
+  email                 String    @unique
+  password_hash         String
+  role                  Role      @default(STUDENT)
 
   // Связи
-  viewed_cards            UserViewedCard[]
-  userFavoriteCards       UserFavoriteCard[]
-  userFavoriteSubjects    UserFavoriteSubject[]
-  userArchivedSubjects    UserArchivedSubject[]
-
-  // Упрощённые связи многие-ко-многим (для удобства доступа)
-  favorite_cards          Card[]   @relation("FavoriteCards")
-  favorite_subjects       Subject[] @relation("FavoriteSubjects")
-  archived_subjects       Subject[] @relation("ArchivedSubjects")
-}
-
-model Subject {
-  id              Int      @id @default(autoincrement())
-  name            String
-  subject_type    String
-
-  cards           Card[]
+  viewed_cards          UserViewedCard[]
+  userFavoriteCards     UserFavoriteCard[]
   userFavoriteSubjects  UserFavoriteSubject[]
   userArchivedSubjects  UserArchivedSubject[]
 
-  // Обратные связи
-  favored_by      User[]  @relation("FavoriteSubjects")
-  archived_by     User[]  @relation("ArchivedSubjects")
+  // Упрощённые связи многие-ко-многим (для удобства доступа)
+  favorite_cards        Card[]    @relation("FavoriteCards")
+  favorite_subjects     Subject[] @relation("FavoriteSubjects")
+  archived_subjects     Subject[] @relation("ArchivedSubjects")
+}
+
+model Subject {
+  id                    Int       @id @default(autoincrement())
+  name                  String
+  subject_type          String
+
+  cards                 Card[]
+  userFavoriteSubjects  UserFavoriteSubject[]
+  userArchivedSubjects  UserArchivedSubject[]
+
+  favored_by            User[]    @relation("FavoriteSubjects")
+  archived_by           User[]    @relation("ArchivedSubjects")
+
+  // Связь с группами через таблицу SubjectGroup
+  subjectGroups         SubjectGroup[]
 }
 
 model Card {
-  id              Int      @id @default(autoincrement())
-  title           String
-  description     String
-  subject_id      Int
+  id                    Int       @id @default(autoincrement())
+  title                 String
+  description           String
+  subject_id            Int
 
-  subject         Subject   @relation(fields: [subject_id], references: [id])
-  viewed_by       UserViewedCard[]
-  userFavoriteCards  UserFavoriteCard[]
+  subject               Subject   @relation(fields: [subject_id], references: [id])
+  viewed_by             UserViewedCard[]
+  userFavoriteCards     UserFavoriteCard[]
 
-  // Многие ко многим: группы
-  groups          Group[]  @relation("CardGroups")
-
-  // Обратная связь
-  favored_by      User[]   @relation("FavoriteCards")
+  favored_by            User[]    @relation("FavoriteCards")
 }
-
-model Group {
-  id      Int      @id @default(autoincrement())
-  name    String   @unique
-
-  cards   Card[]   @relation("CardGroups")
-}
-
-// =============================
-// Pivot-таблицы
-// =============================
 
 model UserViewedCard {
   user_id    Int
@@ -118,4 +105,15 @@ model UserArchivedSubject {
 
   @@id([user_id, subject_id])
   @@map("user_archived_subjects")
+}
+
+// Новая таблица для связи предметов с группами
+model SubjectGroup {
+  id        Int      @id @default(autoincrement())
+  subjectId Int
+  groupName String
+
+  subject   Subject  @relation(fields: [subjectId], references: [id])
+
+  @@unique([subjectId, groupName]) // Обеспечиваем уникальность пары (subjectId, groupName)
 }
