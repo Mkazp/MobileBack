@@ -1,9 +1,17 @@
-import { Injectable, ConflictException, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  UnauthorizedException,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { RegisterDto } from './dto/register.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { LoginDto } from './dto/login.dto';
 import { PrismaService } from '../../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
+import { Prisma, User } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -74,6 +82,57 @@ export class AuthService {
       access_token: token,
       userId: user.id, // Добавляем ID пользователя в ответ
       group_name: user.group_name,
+    };
+  }
+
+  async updateUser(id: number, dto: UpdateUserDto) {
+    const user: User | null = await this.prisma.user.findUnique({ where: { id } });
+
+    if (!user) {
+      throw new NotFoundException('Пользователь не найден');
+    }
+
+    // Проверка и хеширование нового пароля
+    let password_hash: string | undefined = undefined;
+    if (dto.new_password) {
+      if (!dto.old_password) {
+        throw new BadRequestException('Не указан старый пароль');
+      }
+
+      const isOldPasswordValid = await bcrypt.compare(dto.old_password, user.password_hash);
+      if (!isOldPasswordValid) {
+        throw new UnauthorizedException('Старый пароль неверен');
+      }
+
+      password_hash = await bcrypt.hash(dto.new_password, 10);
+    }
+
+    // Подготавливаем данные для обновления
+    const updateData: Prisma.UserUpdateInput = {
+      first_name: dto.first_name,
+      last_name: dto.last_name,
+      email: dto.email,
+      group_name: dto.group_name,
+    };
+
+    if (password_hash) {
+      updateData.password_hash = password_hash;
+    }
+
+    const updatedUser = await this.prisma.user.update({
+      where: { id },
+      data: updateData,
+    });
+
+    return {
+      message: 'Профиль обновлён',
+      user: {
+        id: updatedUser.id,
+        email: updatedUser.email,
+        first_name: updatedUser.first_name,
+        last_name: updatedUser.last_name,
+        group_name: updatedUser.group_name,
+      },
     };
   }
 

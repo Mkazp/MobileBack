@@ -1,10 +1,13 @@
-import { Body, Controller, Post, Get, UseGuards, Delete } from '@nestjs/common'; // Добавлен импорт UseGuards и Get
+import { Body, Controller, Post, Get, UseGuards, Delete, Patch, Req } from '@nestjs/common'; // Добавлен импорт UseGuards и Get
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from './jwt-auth.guard'; // Импортируем JwtAuthGuard
 // import { GetUser, User } from './get-user.decorator';
 import { Param } from '@nestjs/common';
+import { Request } from 'express';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { RequestWithUser } from './request-with-user';
 
 @Controller('auth')
 export class AuthController {
@@ -36,5 +39,11 @@ export class AuthController {
   @Delete(':id')
   deleteUserById(@Param('id') id: number) {
     return this.authService.deleteUser(Number(id));
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('me')
+  updateCurrentUser(@Req() req: RequestWithUser, @Body() dto: UpdateUserDto) {
+    return this.authService.updateUser(req.user.id, dto);
   }
 }
