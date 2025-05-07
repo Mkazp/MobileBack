@@ -41,6 +41,7 @@ export class AuthService {
         id: user.id,
         email: user.email,
         role: user.role,
+        group_name: user.group_name,
       },
       // Возвращаем token также
       access_token: await this.jwtService.signAsync({
@@ -72,6 +73,7 @@ export class AuthService {
     return {
       access_token: token,
       userId: user.id, // Добавляем ID пользователя в ответ
+      group_name: user.group_name,
     };
   }
 
