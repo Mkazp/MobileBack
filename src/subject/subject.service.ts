@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateSubjectDto } from './dto/create-subject.dto';
-
+import { UpdateSubjectDto } from './dto/update-subject.dto';
 @Injectable()
 export class SubjectService {
   constructor(private prisma: PrismaService) {}
@@ -104,6 +104,34 @@ export class SubjectService {
           user_id: userId,
           subject_id: subjectId,
         },
+      },
+    });
+  }
+
+  async update(subjectId: number, dto: UpdateSubjectDto) {
+    // Если нужно обновить группы — сначала удалим старые и создадим новые
+    if (dto.groupNames) {
+      await this.prisma.subjectGroup.deleteMany({
+        where: { subjectId },
+      });
+
+      await this.prisma.subjectGroup.createMany({
+        data: dto.groupNames.map(groupName => ({
+          subjectId,
+          groupName,
+        })),
+      });
+    }
+
+    // Обновим сам предмет (имя и тип)
+    return this.prisma.subject.update({
+      where: { id: subjectId },
+      data: {
+        name: dto.name,
+        subject_type: dto.subject_type,
+      },
+      include: {
+        subjectGroups: true,
       },
     });
   }

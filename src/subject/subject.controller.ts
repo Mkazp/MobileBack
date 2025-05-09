@@ -1,9 +1,9 @@
-import { Controller, Post, Body, Get, UseGuards, Delete, Param } from '@nestjs/common';
+import { Controller, Post, Body, Get, UseGuards, Delete, Param, Patch } from '@nestjs/common';
 import { SubjectService } from './subject.service';
 import { CreateSubjectDto } from './dto/create-subject.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { GetUser, User as JwtUser } from '../auth/get-user.decorator';
-
+import { UpdateSubjectDto } from './dto/update-subject.dto';
 @Controller('subjects')
 export class SubjectController {
   constructor(private readonly subjectService: SubjectService) {}
@@ -48,5 +48,11 @@ export class SubjectController {
   @Delete(':id/favorite')
   removeFromFavorites(@Param('id') subjectId: string, @GetUser() user: JwtUser) {
     return this.subjectService.removeFromFavorites(user.id, Number(subjectId));
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() dto: UpdateSubjectDto) {
+    return this.subjectService.update(Number(id), dto);
   }
 }
