@@ -12,12 +12,14 @@ export class SubjectService {
       data: {
         name: dto.name,
         subject_type: dto.subject_type,
-        // Создание связей с группами через таблицу SubjectGroup
         subjectGroups: {
           create: dto.groupNames.map(groupName => ({
             groupName,
           })),
         },
+      },
+      include: {
+        subjectGroups: true, // <-- добавляем включение связей
       },
     });
   }
