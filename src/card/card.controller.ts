@@ -1,8 +1,19 @@
-import { Controller, Post, Body, UseGuards, Get, Query, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Get,
+  Query,
+  Delete,
+  Patch,
+  Param,
+} from '@nestjs/common';
 import { CardService } from './card.service';
 import { CreateCardDto } from './dto/create-card.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { GetUser, User as JwtUser } from '../auth/get-user.decorator';
+import { UpdateCardDto } from './dto/update-card.dto';
 
 @Controller('cards')
 export class CardController {
@@ -51,5 +62,11 @@ export class CardController {
   @Delete('favorite')
   removeFromFavorites(@Query('cardId') cardId: string, @GetUser() user: JwtUser) {
     return this.cardService.removeFromFavorites(user.id, Number(cardId));
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch(':id')
+  updateCard(@Param('id') id: string, @Body() dto: UpdateCardDto) {
+    return this.cardService.updateCard(Number(id), dto);
   }
 }
