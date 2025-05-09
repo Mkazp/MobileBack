@@ -49,6 +49,22 @@ export class SubjectService {
   }
 
   async deleteById(subjectId: number) {
+    // Удалить все карточки, связанные с предметом
+    await this.prisma.card.deleteMany({
+      where: { subject_id: subjectId },
+    });
+
+    // Удалить связи с группами
+    await this.prisma.subjectGroup.deleteMany({
+      where: { subjectId },
+    });
+
+    // Удалить из избранного у всех пользователей
+    await this.prisma.userFavoriteSubject.deleteMany({
+      where: { subject_id: subjectId },
+    });
+
+    // Удалить сам предмет
     return this.prisma.subject.delete({
       where: { id: subjectId },
     });
