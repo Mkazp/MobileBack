@@ -35,6 +35,7 @@ export class CardService {
 
   // Метод для удаления карточки по ID
   async deleteCardById(cardId: number) {
+    console.log('Удаление карточки с ID:', cardId);
     return this.prisma.$transaction([
       // Удаляем из избранного всех пользователей
       this.prisma.userFavoriteCard.deleteMany({
