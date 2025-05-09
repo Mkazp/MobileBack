@@ -38,11 +38,7 @@ export class CardService {
     return this.prisma.$transaction([
       // Удаляем из избранного всех пользователей
       this.prisma.userFavoriteCard.deleteMany({
-        where: {
-          card_id: {
-            equals: cardId,
-          },
-        },
+        where: { card_id: cardId },
       }),
 
       // Удаляем саму карточку
