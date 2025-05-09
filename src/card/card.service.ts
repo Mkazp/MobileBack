@@ -24,11 +24,54 @@ export class CardService {
     });
   }
 
+  async findAll() {
+    return this.prisma.card.findMany({
+      include: {
+        subject: true, // Если хочешь включить информацию о предмете
+      },
+    });
+  }
+
   // Метод для удаления карточки по ID
   async deleteCardById(cardId: number) {
     return this.prisma.card.delete({
       where: {
         id: cardId,
+      },
+    });
+  }
+
+  async addToFavorites(userId: number, cardId: number) {
+    return this.prisma.userFavoriteCard.create({
+      data: {
+        user_id: userId,
+        card_id: cardId,
+      },
+    });
+  }
+
+  async getFavoriteCards(userId: number) {
+    return this.prisma.card.findMany({
+      where: {
+        userFavoriteCards: {
+          some: {
+            user_id: userId,
+          },
+        },
+      },
+      include: {
+        subject: true, // если нужно видеть предмет, к которому относится карточка
+      },
+    });
+  }
+
+  async removeFromFavorites(userId: number, cardId: number) {
+    return this.prisma.userFavoriteCard.delete({
+      where: {
+        user_id_card_id: {
+          user_id: userId,
+          card_id: cardId,
+        },
       },
     });
   }

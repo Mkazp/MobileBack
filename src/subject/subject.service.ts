@@ -38,9 +38,57 @@ export class SubjectService {
     });
   }
 
+  // subject.service.ts
+  async findAll() {
+    return this.prisma.subject.findMany({
+      include: {
+        subjectGroups: true,
+        cards: true, // если нужно
+      },
+    });
+  }
+
   async deleteById(subjectId: number) {
     return this.prisma.subject.delete({
       where: { id: subjectId },
+    });
+  }
+
+  // Добавление предмета в избранное
+  async addToFavorites(userId: number, subjectId: number) {
+    return this.prisma.userFavoriteSubject.create({
+      data: {
+        user_id: userId,
+        subject_id: subjectId,
+      },
+    });
+  }
+
+  // Получение избранных предметов пользователя
+  async getFavoriteSubjects(userId: number) {
+    return this.prisma.subject.findMany({
+      where: {
+        userFavoriteSubjects: {
+          some: {
+            user_id: userId,
+          },
+        },
+      },
+      include: {
+        cards: true,
+      },
+    });
+  }
+
+  // Удаление предмета из избранного
+  async removeFromFavorites(userId: number, subjectId: number) {
+    return this.prisma.userFavoriteSubject.delete({
+      where: {
+        user_id_subject_id: {
+          user_id: userId,
+          subject_id: subjectId,
+        },
+      },
     });
   }
 }

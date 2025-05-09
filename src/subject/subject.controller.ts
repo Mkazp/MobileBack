@@ -25,4 +25,28 @@ export class SubjectController {
   delete(@Param('id') id: string) {
     return this.subjectService.deleteById(Number(id));
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('all')
+  getAllSubjects() {
+    return this.subjectService.findAll();
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/favorite')
+  addToFavorites(@Param('id') subjectId: string, @GetUser() user: JwtUser) {
+    return this.subjectService.addToFavorites(user.id, Number(subjectId));
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('favorites')
+  getFavoriteSubjects(@GetUser() user: JwtUser) {
+    return this.subjectService.getFavoriteSubjects(user.id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete(':id/favorite')
+  removeFromFavorites(@Param('id') subjectId: string, @GetUser() user: JwtUser) {
+    return this.subjectService.removeFromFavorites(user.id, Number(subjectId));
+  }
 }
