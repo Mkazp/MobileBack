@@ -39,7 +39,7 @@ export class CardController {
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  async delete(@Query('id') id: string) {
+  async delete(@Param('id') id: string) {
     return this.cardService.deleteCardById(Number(id));
   }
 
