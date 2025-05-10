@@ -8,4 +8,8 @@ export class UpdateCardDto {
   @IsOptional()
   @IsString()
   description?: string;
+
+  @IsOptional()
+  @IsString()
+  content?: string; // 👈 Добавляем это
 }

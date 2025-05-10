@@ -14,6 +14,7 @@ export class CardService {
         title: dto.title,
         description: dto.description,
         subject_id: dto.subject_id,
+        content: dto.content,
       },
     });
   }
