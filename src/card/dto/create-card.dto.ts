@@ -11,4 +11,8 @@ export class CreateCardDto {
 
   @IsInt()
   subject_id!: number;
+
+  @IsString()
+  @IsNotEmpty()
+  content!: string;
 }
