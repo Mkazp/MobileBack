@@ -74,6 +74,7 @@ export class CardService {
   }
 
   async removeFromFavorites(userId: number, cardId: number) {
+    console.log('Удаление карточки с ID:', userId, ' ', cardId);
     return this.prisma.userFavoriteCard.delete({
       where: {
         user_id_card_id: {

@@ -55,6 +55,8 @@ model Card {
   title                 String
   description           String
   subject_id            Int
+  content   String?      // Основной текст карточки (например, объяснение)
+
 
   subject               Subject   @relation(fields: [subject_id], references: [id])
   viewed_by             UserViewedCard[]
