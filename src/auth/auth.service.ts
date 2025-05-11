@@ -161,6 +161,7 @@ export class AuthService {
         first_name: true,
         last_name: true,
         email: true,
+        group_name: true,
         role: true,
       },
     });
@@ -175,6 +176,7 @@ export class AuthService {
         first_name: true,
         last_name: true,
         email: true,
+        group_name: true,
         role: true,
       },
     });

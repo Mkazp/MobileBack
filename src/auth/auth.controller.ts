@@ -1,4 +1,14 @@
-import { Body, Controller, Post, Get, UseGuards, Delete, Patch, Req } from '@nestjs/common'; // Добавлен импорт UseGuards и Get
+import {
+  Body,
+  Controller,
+  Post,
+  Get,
+  UseGuards,
+  Delete,
+  Patch,
+  Req,
+  ParseIntPipe,
+} from '@nestjs/common'; // Добавлен импорт UseGuards и Get
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -45,5 +55,11 @@ export class AuthController {
   @Patch('me')
   updateCurrentUser(@Req() req: RequestWithUser, @Body() dto: UpdateUserDto) {
     return this.authService.updateUser(req.user.id, dto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch(':id')
+  updateUserById(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateUserDto) {
+    return this.authService.updateUser(id, dto);
   }
 }
