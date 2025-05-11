@@ -1,4 +1,5 @@
-import { IsOptional, IsString, IsEmail } from 'class-validator';
+import { IsOptional, IsString, IsEmail, IsEnum } from 'class-validator';
+import { Role } from '@prisma/client'; // Импортируем Role из Prisma
 
 export class UpdateUserDto {
   @IsOptional()
@@ -24,4 +25,8 @@ export class UpdateUserDto {
   @IsOptional()
   @IsString()
   new_password?: string;
+
+  @IsOptional()
+  @IsEnum(Role) // Проверка на валидность роли
+  role?: Role;
 }

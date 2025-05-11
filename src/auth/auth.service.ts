@@ -113,11 +113,9 @@ export class AuthService {
       last_name: dto.last_name,
       email: dto.email,
       group_name: dto.group_name,
+      ...(password_hash && { password_hash }),
+      ...(dto.role && { role: dto.role }),
     };
-
-    if (password_hash) {
-      updateData.password_hash = password_hash;
-    }
 
     const updatedUser = await this.prisma.user.update({
       where: { id },
@@ -132,6 +130,7 @@ export class AuthService {
         first_name: updatedUser.first_name,
         last_name: updatedUser.last_name,
         group_name: updatedUser.group_name,
+        role: updatedUser.role,
       },
     };
   }
